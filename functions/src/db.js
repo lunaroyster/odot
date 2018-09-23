@@ -1,6 +1,6 @@
-const admin = require('firebase-admin');
+const firebase = require('./firebase');
 
-const db = admin.firestore();
+const db = firebase.firestore();
 db.settings({
   timestampsInSnapshots: true
 });
