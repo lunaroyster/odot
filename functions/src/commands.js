@@ -8,6 +8,13 @@ let commands = {
       text: `Added task: ${req.body.text}`
     });
   },
+  '/odots': async function(req, res) {
+    let odots = await odot.getOdots(req.body.team_id);
+    res.status(200).send({
+      text: `*Here are your odots*:\n${odots.map((o, p)=>`>${p+1}: ${o}`).join('\n')}`,
+      mrkdwn: true,
+    });
+  },
   '/odot': async function(req, res) {
     if(req.body.text == 'nuke') {
       await odot.wipeAllTeamTasks(req.body.team_id);
