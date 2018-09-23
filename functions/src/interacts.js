@@ -4,7 +4,7 @@ const odot = require('./odot');
 
 let interacts = {
   'create_odot': async function({ payload }, res) {
-    await odot.createOdot(payload.message.text, payload.team.id);
+    await odot.createOdot(payload.message.text, payload.team.id, payload.user.id, payload.channel.id);
     res.status(200).send();
     await axios.post(payload.response_url, {
       text: `Added task: ${payload.message.text}`

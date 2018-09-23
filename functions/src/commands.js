@@ -3,10 +3,8 @@ const odot = require('./odot');
 
 let commands = {
   '/o': async function(req, res) {
-    await odot.createOdot(req.body.text, req.body.team_id);
-    res.status(201).send({
-      text: `Added task: ${req.body.text}`
-    });
+    await odot.createOdot(req.body.text, req.body.team_id, req.body.user_id, req.body.channel_id);
+    res.status(201).send({text: `Added task: ${req.body.text}`});
   },
   '/odots': async function(req, res) {
     let odots = await odot.getOdots(req.body.team_id);

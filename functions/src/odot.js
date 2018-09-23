@@ -22,12 +22,14 @@ function getChannels (text) {
   return channelObject;
 }
 
-async function createOdot(task, teamID) {
+async function createOdot(task, teamID, creator, createdIn) {
   let taskObject = {
     task,
     time: new Date(),
     completed: false,
     channels: getChannels(task),
+    creator,
+    createdIn,
     users: getUsers(task),
   };
   await db.collection('teams').doc(teamID).collection('tasks').add(taskObject);
