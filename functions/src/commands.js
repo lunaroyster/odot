@@ -8,6 +8,12 @@ let commands = {
       text: `Added task: ${req.body.text}`
     });
   },
+  '/odot': async function(req, res) {
+    if(req.body.text == 'nuke') {
+      await odot.wipeAllTeamTasks(req.body.team_id);
+      res.status(200).send({text: `Nuked all odots for ${req.body.team_domain}`});
+    }
+  },
 };
 
 module.exports = async function(req, res) {
