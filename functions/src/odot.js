@@ -21,19 +21,14 @@ function getChannels (text) {
   channels.forEach(c => channelObject[c] = true);
   return channelObject;
 }
-function getEntities(text) {
-  return {
-    channels: getChannels(text),
-    users: getUsers(text)
-  };
-}
 
 async function createOdot(task, teamID) {
   let taskObject = {
     task,
     time: new Date(),
     completed: false,
-    ...getEntities(task)
+    channels: getChannels(task),
+    users: getUsers(task),
   };
   await db.collection('teams').doc(teamID).collection('tasks').add(taskObject);
 }
