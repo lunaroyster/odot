@@ -33,7 +33,7 @@ async function createOdot(task, teamID, creator, createdIn) {
     createdIn,
     users: getUsers(task),
   };
-  await db.runTransaction(async txn => {
+  let result = await db.runTransaction(async txn => {
     let tasksRef = db.collection(`teams/${teamID}/tasks`);
     let id;
     while (true) {
@@ -44,7 +44,9 @@ async function createOdot(task, teamID, creator, createdIn) {
       break;
     }
     await txn.set(tasksRef.doc(id), taskObject);
+    return {...taskObject, id};
   });
+  return result;
 }
 
 async function getOdots(teamID) {
