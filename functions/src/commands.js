@@ -3,14 +3,24 @@ const odot = require('./odot');
 const axios = require('axios');
 
 let commands = {
-  '/o': async function(req, res) {
-    let o = await odot.createOdot(req.body.text, req.body.team_id, req.body.user_id, req.body.channel_id);
+  '/o': async function({ body }, res) {
+    let { text, team_id, user_id, channel_id } = body;
+    let o = await odot.createOdot(text, team_id, user_id, channel_id);
     res.status(201).send({text: `Added task _${o.id}_: ${o.task}`});
+  },
+  '/dot': async function({ body }, res) {
+    let { text, team_id } = body;
+    if (text.length==4) {
+      await odot.markOdotAsComplete(text, team_id);
+      res.status(200).send({text: `Marked odot as complete`});
+    } else if (text.length==0) {
+      //TODO: GUI mode
+    }
   },
   '/odots': async function(req, res) {
     let odots = await odot.getOdots(req.body.team_id);
     res.status(200).send({
-      text: `*Here are your odots*:\n${odots.map((o, p)=>`>${p+1}: ${o}`).join('\n')}`,
+      text: `*Here are your odots*:\n${odots.map((o, p)=>`>\`${o.id}\`: ${o.task}`).join('\n')}`,
       mrkdwn: true,
     });
   },
