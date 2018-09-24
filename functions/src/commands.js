@@ -6,13 +6,13 @@ let commands = {
   '/o': async function({ body }, res) {
     let { text, team_id, user_id, channel_id } = body;
     let o = await odot.createOdot(text, team_id, user_id, channel_id);
-    res.status(201).send({text: `Added task _${o.id}_: ${o.task}`});
+    res.status(201).send({text: `Added task \`${o.id}\`: ${o.task}`});
   },
   '/dot': async function({ body }, res) {
     let { text, team_id } = body;
     if (text.length==4) {
       await odot.markOdotAsComplete(text, team_id);
-      res.status(200).send({text: `Marked odot as complete`});
+      res.status(200).send({text: `Completed task \`${text}\``});
     } else if (text.length==0) {
       //TODO: GUI mode
     }
