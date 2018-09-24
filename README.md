@@ -8,4 +8,6 @@
 |/dot| Brings up Slack interface to mark tasks as complete |
 |/dot [task ID]| Marks task as complete |
 |/odot nuke| Deletes all tasks |
-|/odots| List all tasks|
+|/odots| List tasks referencing current user|
+|/odots @alice| List tasks referencing Alice|
+|/odots #general| List tasks referencing #general|
