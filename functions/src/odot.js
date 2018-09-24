@@ -32,6 +32,16 @@ let getOdotsFromSnapshot = snapshot => {
   return odots;
 };
 
+let uniqueArrayByKey = (key, ...arrays) => {
+  let uniqueMap = {};
+  arrays.forEach(array => {
+    array.forEach(element => {
+      uniqueMap[element[key]] = element;
+    });
+  });
+  return Object.values(uniqueMap);
+};
+
 async function createOdot(task, teamID, creator, createdIn) {
   let getRandom = ()=>Math.floor(Math.random()*(36**4-1)).toString(36);
   let taskObject = {
@@ -93,11 +103,23 @@ async function getUserCreatedOdots(userID, teamID) {
 async function getUserRelatedOdots(userID, teamID) {
   let referencedOdots = getOdotsFromSnapshot(await tasksRef(teamID).where(`users.${userID}`, '==', true).get());
   let createdOdots = getOdotsFromSnapshot(await tasksRef(teamID).where("creator", '==', userID).get());
-  let odots = [...createdOdots];
-  referencedOdots.forEach(odot => {
-    if(!odots.find(o=>o.id==odot.id)) odots.push(odot);
-  });
-  return odots;
+  return uniqueArrayByKey('id', referencedOdots, createdOdots);
+}
+
+async function getChannelReferencedOdots(channelID, teamID) {
+  let odotsSnapshot = await tasksRef(teamID).where(`channels.${channelID}`, '==', true).get();
+  return getOdotsFromSnapshot(odotsSnapshot);
+}
+
+async function getChannelCreatedOdots(channelID, teamID) {
+  let odotsSnapshot = await tasksRef(teamID).where("createdIn", '==', channelID).get();
+  return getOdotsFromSnapshot(odotsSnapshot);
+}
+
+async function getChannelRelatedOdots(channelID, teamID) {
+  let referencedOdots = getOdotsFromSnapshot(await tasksRef(teamID).where(`channels.${channelID}`, '==', true).get());
+  let createdOdots = getOdotsFromSnapshot(await tasksRef(teamID).where("createdIn", '==', channelID).get());
+  return uniqueArrayByKey('id', referencedOdots, createdOdots);
 }
 
 async function wipeAllTeamTasks(teamID) {
