@@ -49,11 +49,28 @@ async function createOdot(task, teamID, creator, createdIn) {
   return result;
 }
 
+async function markOdotAsComplete(odotID, teamID) {
+  let result = await db.runTransaction(async txn => {
+    let odotRef = db.doc(`teams/${teamID}/tasks/${odotID}`);
+    let odotDoc = await txn.get(odotRef);
+    if(!odotDoc.exists) return; //return failure
+    if(!odotDoc.data().completed) {
+      await txn.update(odotRef, {completed: true});
+    }
+  });
+  return result;
+}
+
+async function deleteOdot(odotID, teamID) {
+  let odotRef = db.doc(`teams/${teamID}/tasks/${odotID}`);
+  await odotRef.delete();
+}
+
 async function getOdots(teamID) {
   let odotsSnapshot = await db.collection('teams').doc(teamID).collection('tasks').get();
   let odots = [];
   odotsSnapshot.forEach(doc=> {
-    odots.push(doc.data().task);
+    odots.push({...doc.data(), id: doc.id});
   });
   return odots;
 }
@@ -66,4 +83,6 @@ module.exports = {
   createOdot,
   getOdots,
   wipeAllTeamTasks,
+  markOdotAsComplete,
+  deleteOdot,
 };
