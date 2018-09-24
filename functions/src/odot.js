@@ -22,6 +22,16 @@ function getChannels (text) {
   return channelObject;
 }
 
+let tasksRef = teamID => db.collection(`teams/${teamID}/tasks`);
+
+let getOdotsFromSnapshot = snapshot => {
+  let odots = [];
+  snapshot.forEach(doc=> {
+    odots.push({...doc.data(), id: doc.id});
+  });
+  return odots;
+};
+
 async function createOdot(task, teamID, creator, createdIn) {
   let getRandom = ()=>Math.floor(Math.random()*(36**4-1)).toString(36);
   let taskObject = {
@@ -34,16 +44,15 @@ async function createOdot(task, teamID, creator, createdIn) {
     users: getUsers(task),
   };
   let result = await db.runTransaction(async txn => {
-    let tasksRef = db.collection(`teams/${teamID}/tasks`);
     let id;
     while (true) {
       let testId = getRandom();
-      let taskDoc = await txn.get(tasksRef.doc(testId));
+      let taskDoc = await txn.get(tasksRef(teamID).doc(testId));
       if (taskDoc.exists) continue;
       id = testId;
       break;
     }
-    await txn.set(tasksRef.doc(id), taskObject);
+    await txn.set(tasksRef(teamID).doc(id), taskObject);
     return {...taskObject, id};
   });
   return result;
@@ -51,7 +60,7 @@ async function createOdot(task, teamID, creator, createdIn) {
 
 async function markOdotAsComplete(odotID, teamID) {
   let result = await db.runTransaction(async txn => {
-    let odotRef = db.doc(`teams/${teamID}/tasks/${odotID}`);
+    let odotRef = tasksRef(teamID).doc(odotID);
     let odotDoc = await txn.get(odotRef);
     if(!odotDoc.exists) return; //return failure
     if(!odotDoc.data().completed) {
@@ -62,17 +71,18 @@ async function markOdotAsComplete(odotID, teamID) {
 }
 
 async function deleteOdot(odotID, teamID) {
-  let odotRef = db.doc(`teams/${teamID}/tasks/${odotID}`);
+  let odotRef = tasksRef(teamID).doc(odotID);
   await odotRef.delete();
 }
 
 async function getOdots(teamID) {
-  let odotsSnapshot = await db.collection('teams').doc(teamID).collection('tasks').get();
-  let odots = [];
-  odotsSnapshot.forEach(doc=> {
-    odots.push({...doc.data(), id: doc.id});
-  });
-  return odots;
+  let odotsSnapshot = await tasksRef(teamID).get();
+  return getOdotsFromSnapshot(odotsSnapshot);
+}
+
+async function getUserReferencedOdots(userID, teamID) {
+  let odotsSnapshot = await tasksRef(teamID).where(`users.${userID}`, '==', true).get();
+  return getOdotsFromSnapshot(odotsSnapshot);
 }
 
 async function wipeAllTeamTasks(teamID) {
@@ -85,4 +95,5 @@ module.exports = {
   wipeAllTeamTasks,
   markOdotAsComplete,
   deleteOdot,
+  getUserReferencedOdots,
 };
