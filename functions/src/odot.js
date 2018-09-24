@@ -85,6 +85,21 @@ async function getUserReferencedOdots(userID, teamID) {
   return getOdotsFromSnapshot(odotsSnapshot);
 }
 
+async function getUserCreatedOdots(userID, teamID) {
+  let odotsSnapshot = await tasksRef(teamID).where("creator", '==', userID).get();
+  return getOdotsFromSnapshot(odotsSnapshot);
+}
+
+async function getUserRelatedOdots(userID, teamID) {
+  let referencedOdots = getOdotsFromSnapshot(await tasksRef(teamID).where(`users.${userID}`, '==', true).get());
+  let createdOdots = getOdotsFromSnapshot(await tasksRef(teamID).where("creator", '==', userID).get());
+  let odots = [...createdOdots];
+  referencedOdots.forEach(odot => {
+    if(!odots.find(o=>o.id==odot.id)) odots.push(odot);
+  });
+  return odots;
+}
+
 async function wipeAllTeamTasks(teamID) {
   await deleteCollection(db, `teams/${teamID}/tasks`, 10);
 }
@@ -96,4 +111,6 @@ module.exports = {
   markOdotAsComplete,
   deleteOdot,
   getUserReferencedOdots,
+  getUserCreatedOdots,
+  getUserRelatedOdots,
 };
