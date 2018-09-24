@@ -23,16 +23,28 @@ function getChannels (text) {
 }
 
 async function createOdot(task, teamID, creator, createdIn) {
+  let getRandom = ()=>Math.floor(Math.random()*(36**4-1)).toString(36);
   let taskObject = {
     task,
-    time: new Date(),
+    creation: new Date(),
     completed: false,
     channels: getChannels(task),
     creator,
     createdIn,
     users: getUsers(task),
   };
-  await db.collection('teams').doc(teamID).collection('tasks').add(taskObject);
+  await db.runTransaction(async txn => {
+    let tasksRef = db.collection(`teams/${teamID}/tasks`);
+    let id;
+    while (true) {
+      let testId = getRandom();
+      let taskDoc = await txn.get(tasksRef.doc(testId));
+      if (taskDoc.exists) continue;
+      id = testId;
+      break;
+    }
+    await txn.set(tasksRef.doc(id), taskObject);
+  });
 }
 
 async function getOdots(teamID) {

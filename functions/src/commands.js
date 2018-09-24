@@ -1,5 +1,6 @@
 const db = require('./db');
 const odot = require('./odot');
+const axios = require('axios');
 
 let commands = {
   '/o': async function(req, res) {
