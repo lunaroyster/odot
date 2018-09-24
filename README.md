@@ -11,3 +11,7 @@
 |/odots| List tasks referencing current user|
 |/odots @alice| List tasks referencing Alice|
 |/odots #general| List tasks referencing #general|
+
+ODOT also adds an action:
+
+![](https://i.imgur.com/7fWVavx.png)
