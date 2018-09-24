@@ -17,8 +17,8 @@ let commands = {
       //TODO: GUI mode
     }
   },
-  '/odots': async function(req, res) {
-    let odots = await odot.getOdots(req.body.team_id);
+  '/odots': async function({ body }, res) {
+    let odots = await odot.getUserRelatedOdots(body.user_id, body.team_id);
     res.status(200).send({
       text: `*Here are your odots*:\n${odots.map((o, p)=>`>\`${o.id}\`: ${o.task}`).join('\n')}`,
       mrkdwn: true,
